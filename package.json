@@ -1,45 +1,84 @@
 {
   "name": "anonymous-apex-notebook",
-	"displayName": "Anonymous Apex Notebook",
-	"description": "Simple actions for running anonymous apex scripts in VSCode's Notebook",
-	"version": "0.0.1",
-	"engines": {
-		"vscode": "^1.87.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-        "onCommand:anonymous-apex-notebook.helloWorld"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "anonymous-apex-notebook.helloWorld",
-				"title": "Hello World"
-			}
-		]
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile && npm run lint",
-		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
-	},
-	"devDependencies": {
-		"@types/vscode": "^1.87.0",
-		"@types/glob": "^7.1.4",
-		"@types/mocha": "^9.0.0",
-		"@types/node": "14.x",
-		"@typescript-eslint/eslint-plugin": "^5.1.0",
-		"@typescript-eslint/parser": "^5.1.0",
-		"eslint": "^8.1.0",
-		"glob": "^7.1.7",
-		"mocha": "^9.1.3",
-		"typescript": "^4.4.4",
-		"@vscode/test-electron": "^1.6.2"
-	}
+  "displayName": "Anonymous Apex Notebook",
+  "description": "Simple actions for executing anonymous apex scripts and SOQL queries in VSCode's Notebook",
+  "version": "0.1.0",
+  "icon": "media/package-icon.png",
+  "engines": {
+    "vscode": "^1.87.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "Kernal",
+    "Apex",
+    "SOQL",
+    "Notebook",
+    "Salesforce"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "anonymous-apex-notebook.create-apex-notebook",
+        "title": "New Apex Notebook",
+        "category": "Create"
+      }
+    ],
+    "configuration": {
+      "title": "Apex Notebooks",
+      "properties": {
+        "anonymous-apex-notebook.confirm-dialog-preference": {
+            "type": "string",
+            "title": "Apex Confirm Dialog Preference",
+            "description": "When running apex inside of the notebook, should it ask for confirmation before running the script?",
+            "default": "Always",
+            "order": 0,
+            "enum": [
+                "Always",
+                "Only when running multiple",
+                "Never"
+            ]
+        }
+      }
+    },
+    "notebooks": [
+      {
+        "type": "anon-apex-notebook",
+        "displayName": "Anonymous Apex Notebook",
+        "selector": [
+          {
+            "filenamePattern": "*.apexnotebook"
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.4",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.87.0",
+    "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "@typescript-eslint/parser": "^5.1.0",
+    "@vscode/test-electron": "^1.6.2",
+    "eslint": "^8.1.0",
+    "glob": "^7.1.7",
+    "mocha": "^9.1.3",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "@salesforce/apex-node": "^3.0.2",
+    "@salesforce/core": "^6.7.0"
+  }
 }

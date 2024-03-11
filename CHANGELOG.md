@@ -2,8 +2,6 @@
 
 All notable changes to the "anonymous-apex-notebook" extension will be documented in this file.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## 0.1.0
 
-## [Unreleased]
-
-- Initial release
+Initial VSCode release. Contains a barebones experience for holding various apex scripts and SOQL queries
