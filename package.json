@@ -3,12 +3,16 @@
   "displayName": "Anonymous Apex Notebook",
   "description": "Simple actions for executing anonymous apex scripts and SOQL queries in VSCode's Notebook",
   "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/jake-kirkman/vscode-ext-apex-notebook"
+  },
   "icon": "media/package-icon.png",
   "engines": {
     "vscode": "^1.87.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Notebooks"
   ],
   "keywords": [
     "Kernal",
