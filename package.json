@@ -1,14 +1,14 @@
 {
   "name": "anonymous-apex-notebook",
   "displayName": "Anonymous Apex Notebook",
-  "description": "Simple actions for executing anonymous apex scripts and SOQL queries in VSCode's Notebook",
-  "version": "0.1.0",
+  "description": "Notebook support for executing anonymous apex scripts and SOQL queries",
+  "version": "0.1.1",
   "repository": {
     "url": "https://github.com/jake-kirkman/vscode-ext-apex-notebook"
   },
   "icon": "media/package-icon.png",
   "engines": {
-    "vscode": "^1.87.0"
+    "vscode": "^1.86.2"
   },
   "categories": [
     "Other",
@@ -76,7 +76,7 @@
     "@types/glob": "^7.1.4",
     "@types/mocha": "^9.0.0",
     "@types/node": "14.x",
-    "@types/vscode": "^1.87.0",
+    "@types/vscode": "^1.86.2",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
     "@vscode/test-electron": "^1.6.2",

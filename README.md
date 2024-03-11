@@ -2,7 +2,7 @@
 
 ## Features
 
-Allows the creation of an "Apex Notebook" which enables the execution of Anonymous Apex and SOQL queries within the UI of VSCode's Notebook framework
+Allows the creation of an "Apex Notebook" which enables the execution of Anonymous Apex and SOQL queries within the UI of VSCode's Notebook framework. To get started, use the `Create: New Apex Notebook` in the command prompt. 
 
 ![Demo](media/demo.gif)
 
@@ -30,9 +30,3 @@ This extension contributes the following settings:
 ## Known Issues
 
 None at the moment, let me know if you run into anything via github issues!
-
-## Release Notes
-
-### 0.1.0
-
-Initial VSCode release. Contains a barebones experience for holding various apex scripts and SOQL queries
