@@ -21,6 +21,10 @@
     "Notebook",
     "Salesforce"
   ],
+  "author": {
+    "name": "Jake Kirkman"
+  },
+  "publisher": "JakeKirkman",
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
