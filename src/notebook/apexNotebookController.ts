@@ -55,7 +55,7 @@ export default class NotebookController {
                 let amountOfApexCells = cells.filter(pCell => pCell.document.languageId == 'apex-anon').length;
                 let options = [];
                 //Generate options
-                options.push(`Execute ${amountOfApexCells} Apex script(s)`);
+                options.push(`Execute ${amountOfApexCells} Apex script(s) and any SOQL queries`);
                 if(cells.length != amountOfApexCells) {
                     //If there are some SOQLs and some Apex, display an option to only execute SOQLs
                     options.push('Execute only SOQLs');
@@ -153,7 +153,6 @@ export default class NotebookController {
         if(pRecords.length > 0) {
             //Grab headers
             let headers = Object.keys(pRecords[0]).filter(pKey => pKey != 'attributes').sort();
-            console.log('Headers : ' + JSON.stringify(headers));
             rows.push(headers);
             //Process records
             rows.push(
