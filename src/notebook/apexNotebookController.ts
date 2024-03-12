@@ -82,8 +82,6 @@ export default class NotebookController {
                 this.getConnectionForDefaultUsername.bind(this)
             );
             //Switch depending on type
-            console.log('Cell language id ' + cell.document.languageId);
-            
             switch(cell.document.languageId) {
                 case 'apex-anon':
                     //Grab execute service
@@ -108,17 +106,18 @@ export default class NotebookController {
                     
                     break;
                 case 'soql':
-                    console.log('Querying ' + cell.document.getText());
                     
                     let queryResult = await connection.query(cell.document.getText());
                     success = queryResult.done;
                     let markdownOutput = this.outputRecordAsHtmlTable(queryResult.records);
-                    console.log('## Markdown: \n' + markdownOutput);
+
+                    let output: vscode.NotebookCellOutputItem[] = [];
+                    output.push(vscode.NotebookCellOutputItem.text(markdownOutput, 'text/html'));
+                    if(true == vscode.workspace.getConfiguration().get(CONSTANTS.SETTING_KEY_DISPLAY_JSON_OUTPUT)) {
+                        output.push(vscode.NotebookCellOutputItem.json(queryResult.records));
+                    }
                     
-                    executionTask.appendOutput(new vscode.NotebookCellOutput([
-                        vscode.NotebookCellOutputItem.json(queryResult.records),
-                        vscode.NotebookCellOutputItem.text(markdownOutput, 'text/html')
-                    ]));
+                    executionTask.appendOutput(new vscode.NotebookCellOutput(output));
                     break;
                 default:
                     throw new Error('Unsupported language found: ' + cell.document.languageId);
