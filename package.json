@@ -2,7 +2,7 @@
   "name": "anonymous-apex-notebook",
   "displayName": "Anonymous Apex Notebook",
   "description": "Notebook support for executing anonymous apex scripts and SOQL queries",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "repository": {
     "url": "https://github.com/jake-kirkman/vscode-ext-apex-notebook"
   },
