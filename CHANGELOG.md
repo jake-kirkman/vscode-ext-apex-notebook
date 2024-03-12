@@ -7,6 +7,7 @@ All notable changes to the "anonymous-apex-notebook" extension will be documente
 - Renamed configs to camelCase so VSCode will display the config names properly.
 - Added in `enableSoqlJsonOutput` setting to optionally allow users to display the JSON response when running a SOQL 
 - Made this changelog pretty
+- Added option to execute only SOQLs when running a mixture of Apex and SOQLs
 
 ## 0.1.2
 
