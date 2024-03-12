@@ -43,6 +43,7 @@ export default class NotebookController {
         _controller: vscode.NotebookController
     ) {
         //Check for confirmation dialog
+        let cellsToProcess = [...cells];
         if(cells.some(pCell => pCell.document.languageId == 'apex-anon')) {
             let confirmDialogPreference = vscode.workspace.getConfiguration().get(CONSTANTS.SETTING_KEY_CONFIRM_DIALOG_PREFERENCE);
             if(
@@ -50,19 +51,32 @@ export default class NotebookController {
                 || confirmDialogPreference == CONSTANTS.CONFIRM_DIALOG_OPTION_ONLY_MULTIPLE 
                 && cells.length > 1
             ) {
-                let answer = await vscode.window.showQuickPick([
-                    'Execute Apex',
-                    'Cancel'
-                ], {
-                    title: `Are you sure you want to execute ${cells.length} anonymous apex cells?`
+                //Vars
+                let amountOfApexCells = cells.filter(pCell => pCell.document.languageId == 'apex-anon').length;
+                let options = [];
+                //Generate options
+                options.push(`Execute ${amountOfApexCells} Apex script(s)`);
+                if(cells.length != amountOfApexCells) {
+                    //If there are some SOQLs and some Apex, display an option to only execute SOQLs
+                    options.push('Execute only SOQLs');
+                }
+                options.push('Cancel');
+                //Show quick pick
+                let answer = await vscode.window.showQuickPick(options, {
+                    title: `Are you sure you want to execute ${amountOfApexCells} anonymous apex cell(s)?`
                 });
-                if(!answer || answer == 'Cancel') {
+                //If answer wasn't selected or cancel was pressed, exit.
+                //If answer was Execute only SOQLs, then filter out anything except SOQLs
+                //Otherwise continue on as normal and execute all cells
+                if(!answer || answer === 'Cancel') {
                     return;
+                } else if(answer === 'Execute only SOQLs') {
+                    cellsToProcess = cells.filter(pCell => pCell.document.languageId === 'soql');
                 }
             }
         }
         //Run execute
-        for(let cell of cells) {
+        for(let cell of cellsToProcess) {
             this._doExecution(cell);
         }
     }
@@ -109,10 +123,10 @@ export default class NotebookController {
                     
                     let queryResult = await connection.query(cell.document.getText());
                     success = queryResult.done;
-                    let markdownOutput = this.outputRecordAsHtmlTable(queryResult.records);
+                    let htmlOutput = this.outputRecordAsHtmlTable(queryResult.records);
 
                     let output: vscode.NotebookCellOutputItem[] = [];
-                    output.push(vscode.NotebookCellOutputItem.text(markdownOutput, 'text/html'));
+                    output.push(vscode.NotebookCellOutputItem.text(htmlOutput, 'text/html'));
                     if(true == vscode.workspace.getConfiguration().get(CONSTANTS.SETTING_KEY_DISPLAY_JSON_OUTPUT)) {
                         output.push(vscode.NotebookCellOutputItem.json(queryResult.records));
                     }
