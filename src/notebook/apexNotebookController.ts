@@ -53,9 +53,10 @@ export default class NotebookController {
             ) {
                 //Vars
                 let amountOfApexCells = cells.filter(pCell => pCell.document.languageId == 'apex-anon').length;
+                let amountOfSoqlCells = cells.filter(pCell => pCell.document.languageId == 'soql').length;
                 let options = [];
                 //Generate options
-                options.push(`Execute ${amountOfApexCells} Apex script(s) and any SOQL queries`);
+                options.push(`Execute ${amountOfApexCells} Apex script(s) and ${amountOfSoqlCells} SOQL queries`);
                 if(cells.length != amountOfApexCells) {
                     //If there are some SOQLs and some Apex, display an option to only execute SOQLs
                     options.push('Execute only SOQLs');
