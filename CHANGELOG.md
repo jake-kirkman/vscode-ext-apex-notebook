@@ -2,6 +2,10 @@
 
 All notable changes to the "anonymous-apex-notebook" extension will be documented in this file.
 
+## 0.1.2
+
+More minor config updates
+
 ## 0.1.1
 
 Minor config updates
