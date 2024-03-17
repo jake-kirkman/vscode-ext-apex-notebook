@@ -9,3 +9,6 @@ export const SETTING_KEY_DISPLAY_JSON_OUTPUT = 'anonymous-apex-notebook.enableSo
 export const CONFIRM_DIALOG_OPTION_ALWAYS = 'Always';
 export const CONFIRM_DIALOG_OPTION_ONLY_MULTIPLE = 'Only when running multiple';
 export const CONFIRM_DIALOG_OPTION_NEVER = 'Never';
+
+export const RENDERER_APEX = 'jakekirkman.x-application/anonymous-apex-notebook-apex-output';
+export const RENDERER_SOQL = 'jakekirkman.x-application/anonymous-apex-notebook-soql-output';

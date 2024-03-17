@@ -2,6 +2,12 @@
 
 All notable changes to the "anonymous-apex-notebook" extension will be documented in this file.
 
+## 0.3.0
+
+- Added option to execute only Apex when running a mixture of Apex and SOQLs
+- Extension's code cleanup
+
+
 ## 0.2.0
 
 - Renamed configs to camelCase so VSCode will display the config names properly.
