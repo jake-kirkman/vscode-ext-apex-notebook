@@ -1,7 +1,7 @@
 import { NOTEBOOK_TYPE } from "../constants";
 import * as vscode from 'vscode';
 import * as CONSTANTS from '../constants';
-import * as DataHandler from '../handlers/dataHandler';
+import * as SalesforceHandler from '../handlers/salesforceHandler';
 import * as sfdc_core from '@salesforce/core';
 import * as sfdc from '@salesforce/apex-node';
 
@@ -57,9 +57,15 @@ export default class NotebookController {
                 let options = [];
                 //Generate options
                 options.push(`Execute ${amountOfApexCells} Apex script(s) and ${amountOfSoqlCells} SOQL queries`);
-                if(cells.length != amountOfApexCells) {
-                    //If there are some SOQLs and some Apex, display an option to only execute SOQLs
-                    options.push('Execute only SOQLs');
+                if(amountOfApexCells !== 0 && amountOfSoqlCells !== 0) {
+                    if(amountOfApexCells > 0) {
+                        //If there are some SOQLs and some Apex, display an option to only execute SOQLs
+                        options.push('Execute only Apex');
+                    }
+                    if(amountOfSoqlCells > 0) {
+                        //If there are some SOQLs and some Apex, display an option to only execute SOQLs
+                        options.push('Execute only SOQLs');
+                    }
                 }
                 options.push('Cancel');
                 //Show quick pick
@@ -73,6 +79,8 @@ export default class NotebookController {
                     return;
                 } else if(answer === 'Execute only SOQLs') {
                     cellsToProcess = cells.filter(pCell => pCell.document.languageId === 'soql');
+                } else if(answer === 'Execute only Apex') {
+                    cellsToProcess = cells.filter(pCell => pCell.document.languageId === 'apex-anon');
                 }
             }
         }
@@ -92,56 +100,23 @@ export default class NotebookController {
         try {
             //Grab via queue option so if multiple apex scripts are running, we only initialise
             //the service and related config once
-            let connection = await DataHandler.getLocalWithQueue<sfdc_core.Connection>(
-                CONSTANTS.STORAGE_KEY_APEX_EXECUTE_SERVICE,
-                this.getConnectionForDefaultUsername.bind(this)
-            );
+            let connection = await SalesforceHandler.getSalesforceConnection();
             //Switch depending on type
             switch(cell.document.languageId) {
                 case 'apex-anon':
-                    //Grab execute service
-                    let executor = new sfdc.ExecuteService(connection);
-                    //Execute apex
-                    let response = await executor.executeAnonymous({
-                        apexCode: cell.document.getText()
-                    });
-                    success = response.compiled && response.success;
-                    if(response.diagnostic) {
-                        executionTask.appendOutput(new vscode.NotebookCellOutput([
-                            vscode.NotebookCellOutputItem.json(
-                                response.diagnostic
-                            )
-                        ]));
-                    } 
-                    if(response.logs) {
-                        executionTask.appendOutput(new vscode.NotebookCellOutput([
-                            vscode.NotebookCellOutputItem.text(response.logs)
-                        ]));
-                    }
-                    
+                    success = await this.executeApex(cell, connection, executionTask);
                     break;
                 case 'soql':
-                    
-                    let queryResult = await connection.query(cell.document.getText());
-                    success = queryResult.done;
-                    let htmlOutput = this.outputRecordAsHtmlTable(queryResult.records);
-
-                    let output: vscode.NotebookCellOutputItem[] = [];
-                    output.push(vscode.NotebookCellOutputItem.text(htmlOutput, 'text/html'));
-                    if(true == vscode.workspace.getConfiguration().get(CONSTANTS.SETTING_KEY_DISPLAY_JSON_OUTPUT)) {
-                        output.push(vscode.NotebookCellOutputItem.json(queryResult.records));
-                    }
-                    
-                    executionTask.appendOutput(new vscode.NotebookCellOutput(output));
+                    success = await this.executeSoql(cell, connection, executionTask);
                     break;
                 default:
                     throw new Error('Unsupported language found: ' + cell.document.languageId);
             }
             
-        } catch(ex) {
+        } catch(ex: any) {
             console.error(ex);
             executionTask.replaceOutput(new vscode.NotebookCellOutput([
-                vscode.NotebookCellOutputItem.json(ex)
+                vscode.NotebookCellOutputItem.error(ex)
             ]));
         } finally {
             executionTask.end(success, Date.now());
@@ -149,9 +124,45 @@ export default class NotebookController {
 
     }
 
-    outputRecordAsHtmlTable(pRecords: {[key: string]: any}[]): string {
+    async executeApex(pCell: vscode.NotebookCell, pConnection: sfdc_core.Connection, pExecutionTask: vscode.NotebookCellExecution): Promise<boolean> {
+        //Grab execute service
+        let executor = new sfdc.ExecuteService(pConnection);
+        //Execute apex
+        let response = await executor.executeAnonymous({
+            apexCode: pCell.document.getText()
+        });
+        if(response.diagnostic) {
+            pExecutionTask.appendOutput(new vscode.NotebookCellOutput([
+                vscode.NotebookCellOutputItem.json(
+                    response.diagnostic
+                )
+            ]));
+        } 
+        if(response.logs) {
+            pExecutionTask.appendOutput(new vscode.NotebookCellOutput([
+                vscode.NotebookCellOutputItem.text(response.logs)
+            ]));
+        }
+        return response.compiled && response.success;
+    }
+
+    async executeSoql(pCell: vscode.NotebookCell, pConnection: sfdc_core.Connection, pExecutionTask: vscode.NotebookCellExecution): Promise<boolean> {    
+        let queryResult = await pConnection.query(pCell.document.getText());
+        let htmlOutput = this.outputRecordAsHtmlTable(queryResult.records, queryResult.totalSize);
+
+        let output: vscode.NotebookCellOutputItem[] = [];
+        output.push(vscode.NotebookCellOutputItem.text(htmlOutput, 'text/html'));
+        if(true === vscode.workspace.getConfiguration().get(CONSTANTS.SETTING_KEY_DISPLAY_JSON_OUTPUT)) {
+            output.push(vscode.NotebookCellOutputItem.json(queryResult.records));
+        }
+        
+        pExecutionTask.appendOutput(new vscode.NotebookCellOutput(output));
+        return queryResult.done;
+    }
+
+    outputRecordAsHtmlTable(pRecords: {[key: string]: any}[], pTotal: number): string {
         let rows: string[][] = [];
-        if(pRecords.length > 0) {
+        if(pRecords && pRecords.length > 0) {
             //Grab headers
             let headers = Object.keys(pRecords[0]).filter(pKey => pKey != 'attributes').sort();
             rows.push(headers);
@@ -168,37 +179,13 @@ export default class NotebookController {
                 )
             );
         }
-        return '<table>' + rows.map((pArray, pIndex) => {
+        return '<div>Total Records: ' + pTotal + '</div><table>' + rows.map((pArray, pIndex) => {
             let tagName = pIndex == 0 ? 'th' : 'td';
             let combinedRow = `<tr>` + pArray.map(pItem => `<${tagName}>${pItem}</${tagName}>`).join('') + '</tr>';
             return combinedRow;
         }).join('') + '</table>';
     }
-
-    /**
-     * Based on the Salesforce VSCode plugins, this is how they obtain an execute service
-     * that allows apex scripts to be ran in the target org for the default username
-     * @returns SFDC Execute Service for executing apex
-     */
-    async getConnectionForDefaultUsername() {
-        //Grab config aggregator which contains the default username/alias
-        let configAggregator = await sfdc_core.ConfigAggregator.create();
-        let defaultUsernameOrAlias = JSON.stringify(configAggregator.getPropertyValue('target-org')).replace(/"/g, '');
-        
-        //In order to build an AuthInfo object, we need a username, not an alias
-        //so this grabs it out of the alias map. Of course if it's simply a username to begin with
-        //then we use that if we can't find the alias in the map
-        let info = await sfdc_core.StateAggregator.getInstance();
-        let defaultUsername = info.aliases.getUsername(defaultUsernameOrAlias) || defaultUsernameOrAlias;
-
-        //Build a connection using the default username
-        return await sfdc_core.Connection.create({
-            authInfo: await sfdc_core.AuthInfo.create({
-                username: defaultUsername
-            })
-        });
-    }
-
+    
     dispose() {
 
     }
