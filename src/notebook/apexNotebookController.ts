@@ -160,30 +160,63 @@ export default class NotebookController {
         return queryResult.done;
     }
 
-    outputRecordAsHtmlTable(pRecords: {[key: string]: any}[], pTotal: number): string {
+    outputRecordAsHtmlTable(pRecords: {[key: string]: any}[], pTotal?: number): string {
         let rows: string[][] = [];
         if(pRecords && pRecords.length > 0) {
             //Grab headers
             let headers = Object.keys(pRecords[0]).filter(pKey => pKey != 'attributes').sort();
+            if(headers.includes('Id')) {
+                //Place Id at the beginning of the
+                headers.splice(headers.indexOf('Id'), 1);
+                headers = ['Id', ...headers];
+            }
             rows.push(headers);
             //Process records
             rows.push(
                 ...pRecords.map(
                     pRecord => headers.map(
-                        header => (
-                            '' + (pRecord[header] || ' ')
-                        ).replace(
-                            /\r\n|\n/, '<br/>'
-                        )
+                        header => {
+                            let data = pRecord[header];
+                            if(null != data && typeof data == 'object') {
+                                if(null != data.records) {
+                                    //related list
+                                    data = `<div style="padding: 10px;">${
+                                        this.outputRecordAsHtmlTable(data.records as {[key: string]: any}[])
+                                    }</div>`;
+                                } else if(null != data.attributes) {
+                                    //linked record
+                                    delete data.attributes;
+                                    data = JSON.stringify(data);
+                                }
+                            } else {
+                                data = (
+                                    '' + (data || ' ')
+                                ).replace(
+                                    /\r\n|\n/, 
+                                    '<br/>'
+                                );
+                            }
+                            return data
+                        } 
                     )
                 )
             );
         }
-        return '<div>Total Records: ' + pTotal + '</div><table>' + rows.map((pArray, pIndex) => {
-            let tagName = pIndex == 0 ? 'th' : 'td';
-            let combinedRow = `<tr>` + pArray.map(pItem => `<${tagName}>${pItem}</${tagName}>`).join('') + '</tr>';
-            return combinedRow;
-        }).join('') + '</table>';
+        let output = '';
+        if(pTotal != null && pTotal != 0) {
+            output += '<div>Total Records: ' + pTotal + '</div>';
+        }
+        if(rows.length > 0) {
+            output += '<table>' + rows.map((pArray, pIndex) => {
+                let tagName = pIndex == 0 ? 'th' : 'td';
+                let combinedRow = `<tr>` + pArray.map(pItem => `<${tagName} style="text-align:left">${pItem}</${tagName}>`).join('') + '</tr>';
+                return combinedRow;
+            }).join('') + '</table>';
+        }
+        if(output == '') {
+            output = 'No records found';
+        }
+        return output;
     }
     
     dispose() {

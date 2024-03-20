@@ -2,7 +2,7 @@
   "name": "anonymous-apex-notebook",
   "displayName": "Anonymous Apex Notebook",
   "description": "Notebook support for executing anonymous apex scripts and SOQL queries",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "repository": {
     "url": "https://github.com/jake-kirkman/vscode-ext-apex-notebook"
   },
@@ -39,21 +39,21 @@
       "title": "Apex Notebooks",
       "properties": {
         "anonymous-apex-notebook.apexConfirmDialogPreference": {
-            "type": "string",
-            "description": "When running apex inside of the notebook, should it ask for confirmation before running the script?",
-            "default": "Always",
-            "order": 0,
-            "enum": [
-                "Always",
-                "Only when running multiple",
-                "Never"
-            ]
+          "type": "string",
+          "description": "When running apex inside of the notebook, should it ask for confirmation before running the script?",
+          "default": "Always",
+          "order": 0,
+          "enum": [
+            "Always",
+            "Only when running multiple",
+            "Never"
+          ]
         },
         "anonymous-apex-notebook.enableSoqlJsonOutput": {
-            "type": "boolean",
-            "description": "When executing a SOQL, should the JSON of the SOQL request be displayed in addition to the HTML table view?",
-            "default": false,
-            "order": 0
+          "type": "boolean",
+          "description": "When executing a SOQL, should the JSON of the SOQL request be displayed in addition to the HTML table view?",
+          "default": false,
+          "order": 0
         }
       }
     },

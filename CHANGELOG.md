@@ -2,6 +2,13 @@
 
 All notable changes to the "anonymous-apex-notebook" extension will be documented in this file.
 
+## 0.4.0
+
+- Added text for when no records are returned
+- Added primitive support for displaying lookup fields (e.g MyLookup__r.Name)
+- Added primitive support for child relationships
+- 'Id' column will now always show as the first column
+
 ## 0.3.0
 
 - Added option to execute only Apex when running a mixture of Apex and SOQLs
