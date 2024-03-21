@@ -131,6 +131,18 @@ export default class NotebookController {
         let response = await executor.executeAnonymous({
             apexCode: pCell.document.getText()
         });
+
+        if(response.logs) {
+            const outputText = response.logs
+                .split('\n')
+                .map(line => line.includes('USER_DEBUG') ? line.split('|').slice(2).join('|') : null)
+                .filter(Boolean)
+                .join('\n');    
+
+            pExecutionTask.appendOutput(new vscode.NotebookCellOutput([
+                vscode.NotebookCellOutputItem.text(outputText)
+            ]));
+        }
         if(response.diagnostic) {
             pExecutionTask.appendOutput(new vscode.NotebookCellOutput([
                 vscode.NotebookCellOutputItem.json(
@@ -138,11 +150,7 @@ export default class NotebookController {
                 )
             ]));
         } 
-        if(response.logs) {
-            pExecutionTask.appendOutput(new vscode.NotebookCellOutput([
-                vscode.NotebookCellOutputItem.text(response.logs)
-            ]));
-        }
+        
         return response.compiled && response.success;
     }
 
