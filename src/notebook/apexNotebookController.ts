@@ -177,11 +177,8 @@ export default class NotebookController {
         } 
         if(response.logs) {
             if(vscode.workspace.getConfiguration().get(CONSTANTS.SETTING_KEY_DISPLAY_DEBUG_ONLY)) {
-                const outputText = response.logs
-                    .split('\n')
-                    .map(line => line.includes('USER_DEBUG') ? line.split('|').slice(2).join('|') : null)
-                    .filter(Boolean)
-                    .join('\n');    
+                let reg = /(?<timestamp>^\d+:\d+:\d+.\d+) \((?<ns>\d+)\)\|(?<eventName>.+?)\|\[(?<lineNumber>.+?)\]\|(?<details>[\s\S]*?)\n*(?=^\d+:\d+:\d+.\d+)/gm;
+                const outputText = Array.from(response.logs.matchAll(reg)).map(e => e.groups).filter(e => e.eventName === 'USER_DEBUG').map(e => `[${e.lineNumber.padStart(3,'0')}]|${e.details}`).join('\n') 
     
                 pExecutionTask.appendOutput(new vscode.NotebookCellOutput([
                     vscode.NotebookCellOutputItem.text(outputText || 'No debugs found')
